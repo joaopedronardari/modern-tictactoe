@@ -35,8 +35,8 @@ export function Game() {
   const updateStats = useCallback((result: string) => {
     let newStats = { ...stats };
     if (result === 'Vitória!') {
-      setScore(prev => {
-        const newScore = prev + 50;
+      setScore((prev: number | undefined) => {
+        const newScore = (prev ?? 0) + 50;
         checkAchievements({
           victories: newStats.victories + 1,
           consecutiveWins: consecutiveWins + 1,
@@ -49,8 +49,8 @@ export function Game() {
       newStats = { ...stats, victories: stats.victories + 1 };
       setStats(newStats);
     } else if (result === 'Derrota!') {
-      setScore(prev => {
-        const newScore = prev - 10;
+      setScore((prev: number | undefined) => {
+        const newScore = (prev ?? 0) - 10;
         checkAchievements({
           victories: newStats.victories,
           consecutiveWins: 0,
@@ -63,8 +63,8 @@ export function Game() {
       newStats = { ...stats, defeats: stats.defeats + 1 };
       setStats(newStats);
     } else if (result === 'Empate!') {
-      setScore(prev => {
-        const newScore = prev + 10;
+      setScore((prev: number | undefined) => {
+        const newScore = (prev ?? 0) + 10;
         checkAchievements({
           victories: newStats.victories,
           consecutiveWins: consecutiveWins,
@@ -77,7 +77,7 @@ export function Game() {
       newStats = { ...stats, draws: stats.draws + 1 };
       setStats(newStats);
     }
-  }, [consecutiveWins, difficulty, setDifficulty, setScore, stats, checkAchievements]);
+  }, [consecutiveWins, difficulty, stats, setScore, checkAchievements]);
 
   const handleGameEnd = useCallback((result: string) => {
     setGameResult(result);
@@ -193,7 +193,7 @@ export function Game() {
                     square === 'X' ? 'text-blue-400' : 'text-red-400'
                   }`}
                   onClick={() => handleClick(i)}
-                  disabled={square || gameOver || isThinking || !xIsNext}
+                  disabled={Boolean(square) || gameOver || isThinking || !xIsNext}
                 >
                   {square}
                 </motion.button>

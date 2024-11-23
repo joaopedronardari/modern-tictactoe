@@ -1,11 +1,11 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, Dispatch, SetStateAction } from 'react';
 import { ACHIEVEMENTS, Achievement } from '@/utils/achievements';
 
 interface GameContextType {
   difficulty: number;
-  setDifficulty: (value: number) => void;
+  setDifficulty: (value: number | ((prev: number) => number)) => void;
   unlockedAchievements: Achievement[];
   checkAchievements: (stats: {
     victories: number;
@@ -15,7 +15,7 @@ interface GameContextType {
     difficulty: number;
   }) => void;
   score: number;
-  setScore: (value: number) => void;
+  setScore: Dispatch<SetStateAction<number>>;
   lastAchievement: Achievement | null;
 }
 
@@ -64,9 +64,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setUnlockedAchievements(prev => [...prev, achievement]);
         setLastAchievement(achievement);
         // Mostra notificação de conquista
-        const notification = new Notification('Nova Conquista!', {
-          body: `${achievement.icon} ${achievement.title} - ${achievement.description}`,
-        });
+        if (Notification.permission === 'granted') {
+          new Notification('Nova Conquista!', {
+            body: `${achievement.icon} ${achievement.title} - ${achievement.description}`
+          });
+        }
       }
     });
   };

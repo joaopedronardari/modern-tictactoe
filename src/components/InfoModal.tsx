@@ -27,7 +27,7 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
           <section>
             <h3 className="font-bold mb-2">Regras do Jogo</h3>
             <p>
-              O Jogo da Velha é jogado em um tabuleiro 3x3. Você joga com "X" contra a IA que usa "O".
+              O Jogo da Velha é jogado em um tabuleiro 3x3. Você joga com &quot;X&quot; contra a IA que usa &quot;O&quot;.
               O objetivo é formar uma linha horizontal, vertical ou diagonal com seus símbolos.
             </p>
           </section>

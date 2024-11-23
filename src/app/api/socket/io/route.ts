@@ -67,7 +67,7 @@ export async function GET(req: Request, res: NextApiResponse) {
 
       const playerSymbol = room.players[0] === socket.id ? 'X' : 'O';
       room.board[index] = playerSymbol;
-      room.currentTurn = room.players.find(id => id !== socket.id) || '';
+      room.currentTurn = room.players.find((id: string) => id !== socket.id) || '';
 
       io.to(roomId).emit('gameUpdate', {
         board: room.board,

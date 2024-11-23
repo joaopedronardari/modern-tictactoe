@@ -84,22 +84,6 @@ export function Game() {
     setGameOver(true);
 
     if (result === 'Vitória!') {
-      const boardElement = document.querySelector('.game-board');
-      if (boardElement) {
-        const rect = boardElement.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
-        
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { 
-            x: x / window.innerWidth,
-            y: y / window.innerHeight
-          }
-        });
-      }
-      
       setConsecutiveWins(prev => prev + 1);
       if (consecutiveWins + 1 >= 2 && difficulty < 4) {
         setDifficulty(prev => prev + 1);
@@ -126,7 +110,7 @@ export function Game() {
       setGameResult('');
       setIsThinking(false);
     }, 1500);
-  }, [consecutiveWins, difficulty, setDifficulty, updateStats]);
+  }, [consecutiveWins, difficulty, setDifficulty, updateStats, formatTimestamp]);
 
   const handleClick = (i: number) => {
     if (gameOver || board[i] || !xIsNext || isThinking) return;
@@ -340,6 +324,41 @@ export function Game() {
                 animate={{ scale: [0, 1.2, 1] }}
                 transition={{ duration: 0.5, times: [0, 0.6, 1] }}
                 className="flex flex-col items-center"
+                onAnimationComplete={() => {
+                  if (gameResult === 'Vitória!') {
+                    // Trigger multiple confetti bursts
+                    const count = 3;
+                    const defaults = {
+                      spread: 65,
+                      ticks: 100,
+                      gravity: 0.8,
+                      decay: 0.94,
+                      startVelocity: 30,
+                      shapes: ['star'],
+                      colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8']
+                    };
+
+                    function shoot() {
+                      confetti({
+                        ...defaults,
+                        particleCount: 40,
+                        scalar: 1.2,
+                        shapes: ['star']
+                      });
+
+                      confetti({
+                        ...defaults,
+                        particleCount: 10,
+                        scalar: 0.75,
+                        shapes: ['circle']
+                      });
+                    }
+
+                    setTimeout(shoot, 0);
+                    setTimeout(shoot, 100);
+                    setTimeout(shoot, 200);
+                  }
+                }}
               >
                 <div className="text-5xl mb-4">
                   {gameResult === 'Vitória!' ? '🏆' : gameResult === 'Derrota!' ? '💀' : '🤝'}

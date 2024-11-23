@@ -16,10 +16,10 @@ export function OnlineGame() {
 
   useEffect(() => {
     const socketInitializer = async () => {
-      await fetch('/api/socket');
+      await fetch('/api/socket/io');
       
       socket = io({
-        path: '/api/socket',
+        path: '/api/socket/io',
         addTrailingSlash: false,
       });
 
@@ -57,6 +57,16 @@ export function OnlineGame() {
         setGameStarted(false);
         setBoard(Array(9).fill(null));
       });
+
+      socket.on('disconnect', () => {
+        setMessage('Disconnected from server');
+        setIsConnected(false);
+      });
+
+      socket.on('connect_error', () => {
+        setMessage('Failed to connect to server');
+        setIsConnected(false);
+      });
     };
 
     socketInitializer();
@@ -92,6 +102,7 @@ export function OnlineGame() {
             <button
               onClick={createRoom}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              disabled={!isConnected}
             >
               Create Room
             </button>
@@ -102,10 +113,12 @@ export function OnlineGame() {
                 onChange={(e) => setJoinRoomId(e.target.value)}
                 placeholder="Enter Room Code"
                 className="px-4 py-2 border rounded-lg bg-gray-800 text-white"
+                disabled={!isConnected}
               />
               <button
                 onClick={joinRoom}
                 className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                disabled={!isConnected || !joinRoomId}
               >
                 Join Room
               </button>
@@ -145,6 +158,11 @@ export function OnlineGame() {
         {gameStarted && (
           <div className="mt-2 text-lg text-gray-300">
             You are playing as {symbol}
+          </div>
+        )}
+        {!isConnected && (
+          <div className="mt-4 text-red-400">
+            Trying to reconnect to server...
           </div>
         )}
       </div>

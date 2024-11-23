@@ -1,48 +1,20 @@
-import { Server as SocketIOServer } from 'socket.io';
-import type { Server as HTTPServer } from 'http';
-import type { Socket as NetSocket } from 'net';
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { Server as IOServer } from 'socket.io';
-
-interface SocketServer extends HTTPServer {
-  io?: IOServer | undefined;
-}
-
-interface SocketWithIO extends NetSocket {
-  server: SocketServer;
-}
-
-interface NextApiResponseWithSocket extends NextApiResponse {
-  socket: SocketWithIO;
-}
-
-const rooms = new Map();
+import { Server } from 'socket.io';
+import { NextApiResponseWithSocket } from '@/types/socket';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function GET(req: Request, { params }: { params: {} }) {
-  try {
-    const res = await fetch('http://localhost:3000/api/socket/io');
-    
-    if (res.ok) {
-      return new Response('Socket is running', { status: 200 });
-    } else {
-      return new Response('Socket initialization failed', { status: 500 });
-    }
-  } catch (error) {
-    return new Response('Internal Server Error', { status: 500 });
-  }
-}
+const rooms = new Map();
 
-export async function apiSocketIo(req: Request, res: NextApiResponseWithSocket) {
+export async function GET(req: Request, res: NextApiResponseWithSocket) {
   if (res.socket.server.io) {
-    res.end();
-    return;
+    console.log('Socket.IO already running');
+    return new Response('Socket.IO already running', { status: 200 });
   }
 
-  const io = new SocketIOServer(res.socket.server, {
-    path: '/api/socket',
+  console.log('Setting up Socket.IO');
+  const io = new Server(res.socket.server, {
+    path: '/api/socket/io',
     addTrailingSlash: false,
     cors: {
       origin: '*',
@@ -50,7 +22,7 @@ export async function apiSocketIo(req: Request, res: NextApiResponseWithSocket) 
   });
 
   io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
+    console.log('Client connected:', socket.id);
 
     socket.on('createRoom', () => {
       const roomId = Math.random().toString(36).substring(7);
@@ -81,7 +53,7 @@ export async function apiSocketIo(req: Request, res: NextApiResponseWithSocket) 
       }
     });
 
-    socket.on('move', ({ roomId, index }) => {
+    socket.on('move', ({ roomId, index }: { roomId: string; index: number }) => {
       const room = rooms.get(roomId);
       if (!room) return;
 
@@ -102,7 +74,7 @@ export async function apiSocketIo(req: Request, res: NextApiResponseWithSocket) 
     });
 
     socket.on('disconnect', () => {
-      console.log('User disconnected:', socket.id);
+      console.log('Client disconnected:', socket.id);
       rooms.forEach((room, roomId) => {
         if (room.players.includes(socket.id)) {
           io.to(roomId).emit('playerLeft');
@@ -113,5 +85,5 @@ export async function apiSocketIo(req: Request, res: NextApiResponseWithSocket) 
   });
 
   res.socket.server.io = io;
-  res.end();
+  return new Response('Socket.IO is running', { status: 200 });
 }

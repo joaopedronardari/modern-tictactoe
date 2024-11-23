@@ -170,6 +170,32 @@ export function Game() {
     }
   }, [xIsNext, gameOver, board, difficulty, handleGameEnd]);
 
+  const shoot = () => {
+    const defaults = {
+      spread: 360,
+      ticks: 100,
+      gravity: 0,
+      decay: 0.94,
+      startVelocity: 30,
+      shapes: ["star"],
+      colors: ["FFE400", "FFBD00", "E89400", "FFCA6C", "FDFFB8"],
+    };
+
+    confetti({
+      ...defaults,
+      particleCount: 40,
+      scalar: 1.2,
+      shapes: ["star"],
+    });
+
+    confetti({
+      ...defaults,
+      particleCount: 10,
+      scalar: 0.75,
+      shapes: ["circle"],
+    });
+  };
+
   return (
     <div className="flex flex-col items-center min-h-[calc(100vh-8rem)] px-4 pt-20">
       <div className="flex flex-col lg:flex-row items-start gap-6 max-w-4xl w-full mx-auto">
@@ -327,33 +353,6 @@ export function Game() {
                 onAnimationComplete={() => {
                   if (gameResult === 'Vitória!') {
                     // Trigger multiple confetti bursts
-                    const count = 3;
-                    const defaults = {
-                      spread: 65,
-                      ticks: 100,
-                      gravity: 0.8,
-                      decay: 0.94,
-                      startVelocity: 30,
-                      shapes: ['star'],
-                      colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8']
-                    };
-
-                    function shoot() {
-                      confetti({
-                        ...defaults,
-                        particleCount: 40,
-                        scalar: 1.2,
-                        shapes: ['star']
-                      });
-
-                      confetti({
-                        ...defaults,
-                        particleCount: 10,
-                        scalar: 0.75,
-                        shapes: ['circle']
-                      });
-                    }
-
                     setTimeout(shoot, 0);
                     setTimeout(shoot, 100);
                     setTimeout(shoot, 200);

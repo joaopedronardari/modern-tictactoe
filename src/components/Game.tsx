@@ -84,22 +84,6 @@ export function Game() {
     setGameOver(true);
 
     if (result === 'Vitória!') {
-      const boardElement = document.querySelector('.game-board');
-      if (boardElement) {
-        const rect = boardElement.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
-        
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { 
-            x: x / window.innerWidth,
-            y: y / window.innerHeight
-          }
-        });
-      }
-      
       setConsecutiveWins(prev => prev + 1);
       if (consecutiveWins + 1 >= 2 && difficulty < 4) {
         setDifficulty(prev => prev + 1);
@@ -126,7 +110,7 @@ export function Game() {
       setGameResult('');
       setIsThinking(false);
     }, 1500);
-  }, [consecutiveWins, difficulty, setDifficulty, updateStats]);
+  }, [consecutiveWins, difficulty, setDifficulty, updateStats, formatTimestamp]);
 
   const handleClick = (i: number) => {
     if (gameOver || board[i] || !xIsNext || isThinking) return;
@@ -318,12 +302,77 @@ export function Game() {
       <AnimatePresence>
         {gameResult && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="text-2xl font-bold text-gradient absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-900/90 px-8 py-4 rounded-xl backdrop-blur-sm shadow-xl"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm"
           >
-            {gameResult}
+            <motion.div
+              initial={{ y: 20 }}
+              animate={{ y: 0 }}
+              exit={{ y: 20 }}
+              className={`px-12 py-8 rounded-2xl shadow-2xl ${
+                gameResult === 'Vitória!' 
+                  ? 'bg-gradient-to-br from-blue-500/90 to-blue-600/90 border-2 border-blue-400/50' 
+                  : gameResult === 'Derrota!' 
+                    ? 'bg-gradient-to-br from-red-500/90 to-red-600/90 border-2 border-red-400/50'
+                    : 'bg-gradient-to-br from-yellow-500/90 to-yellow-600/90 border-2 border-yellow-400/50'
+              }`}
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: [0, 1.2, 1] }}
+                transition={{ duration: 0.5, times: [0, 0.6, 1] }}
+                className="flex flex-col items-center"
+                onAnimationComplete={() => {
+                  if (gameResult === 'Vitória!') {
+                    // Trigger multiple confetti bursts
+                    const count = 3;
+                    const defaults = {
+                      spread: 65,
+                      ticks: 100,
+                      gravity: 0.8,
+                      decay: 0.94,
+                      startVelocity: 30,
+                      shapes: ['star'],
+                      colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8']
+                    };
+
+                    function shoot() {
+                      confetti({
+                        ...defaults,
+                        particleCount: 40,
+                        scalar: 1.2,
+                        shapes: ['star']
+                      });
+
+                      confetti({
+                        ...defaults,
+                        particleCount: 10,
+                        scalar: 0.75,
+                        shapes: ['circle']
+                      });
+                    }
+
+                    setTimeout(shoot, 0);
+                    setTimeout(shoot, 100);
+                    setTimeout(shoot, 200);
+                  }
+                }}
+              >
+                <div className="text-5xl mb-4">
+                  {gameResult === 'Vitória!' ? '🏆' : gameResult === 'Derrota!' ? '💀' : '🤝'}
+                </div>
+                <h2 className="text-3xl font-bold text-white mb-2">{gameResult}</h2>
+                <p className="text-white/80 text-center">
+                  {gameResult === 'Vitória!' 
+                    ? 'Parabéns! Você venceu!' 
+                    : gameResult === 'Derrota!' 
+                      ? 'Não foi dessa vez...' 
+                      : 'Foi um bom jogo!'}
+                </p>
+              </motion.div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

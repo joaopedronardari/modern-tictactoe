@@ -35,53 +35,58 @@ export function Game() {
   const updateStats = useCallback((result: string) => {
     let newStats = { ...stats };
     if (result === 'Vitória!') {
-      const newScore = score + 50;
-      setScore(newScore);
-      checkAchievements({
-        victories: newStats.victories + 1,
-        consecutiveWins: consecutiveWins + 1,
-        draws: newStats.draws,
-        score: newScore,
-        difficulty
+      setScore(prev => {
+        const newScore = prev + 50;
+        checkAchievements({
+          victories: newStats.victories + 1,
+          consecutiveWins: consecutiveWins + 1,
+          draws: newStats.draws,
+          score: newScore,
+          difficulty
+        });
+        return newScore;
       });
       newStats = { ...stats, victories: stats.victories + 1 };
       setStats(newStats);
     } else if (result === 'Derrota!') {
-      const newScore = score - 10;
-      setScore(newScore);
-      checkAchievements({
-        victories: newStats.victories,
-        consecutiveWins: 0,
-        draws: newStats.draws,
-        score: newScore,
-        difficulty
+      setScore(prev => {
+        const newScore = prev - 10;
+        checkAchievements({
+          victories: newStats.victories,
+          consecutiveWins: 0,
+          draws: newStats.draws,
+          score: newScore,
+          difficulty
+        });
+        return newScore;
       });
       newStats = { ...stats, defeats: stats.defeats + 1 };
       setStats(newStats);
     } else if (result === 'Empate!') {
-      const newScore = score + 10;
-      setScore(newScore);
-      checkAchievements({
-        victories: newStats.victories,
-        consecutiveWins: consecutiveWins,
-        draws: newStats.draws + 1,
-        score: newScore,
-        difficulty
+      setScore(prev => {
+        const newScore = prev + 10;
+        checkAchievements({
+          victories: newStats.victories,
+          consecutiveWins: consecutiveWins,
+          draws: newStats.draws + 1,
+          score: newScore,
+          difficulty
+        });
+        return newScore;
       });
       newStats = { ...stats, draws: stats.draws + 1 };
       setStats(newStats);
     }
-  }, [consecutiveWins, difficulty, score, stats, checkAchievements]);
+  }, [consecutiveWins, difficulty, setDifficulty, setScore, stats, checkAchievements]);
 
   const handleGameEnd = useCallback((result: string) => {
     setGameResult(result);
     setGameOver(true);
 
     if (result === 'Vitória!') {
-      const newConsecutiveWins = consecutiveWins + 1;
-      setConsecutiveWins(newConsecutiveWins);
-      if (newConsecutiveWins >= 2 && difficulty < 4) {
-        setDifficulty(difficulty + 1);
+      setConsecutiveWins(prev => prev + 1);
+      if (consecutiveWins + 1 >= 2 && difficulty < 4) {
+        setDifficulty(prev => prev + 1);
         setConsecutiveWins(0);
       }
     } else {
@@ -95,8 +100,7 @@ export function Game() {
       timestamp
     };
     
-    const newHistory = [...history, newResult];
-    setHistory(newHistory);
+    setHistory(prev => [...prev, newResult]);
     updateStats(result);
 
     setTimeout(() => {
@@ -106,7 +110,7 @@ export function Game() {
       setGameResult('');
       setIsThinking(false);
     }, 1500);
-  }, [consecutiveWins, difficulty, setDifficulty, updateStats, formatTimestamp, history]);
+  }, [consecutiveWins, difficulty, setDifficulty, updateStats, formatTimestamp]);
 
   const handleClick = (i: number) => {
     if (gameOver || board[i] || !xIsNext || isThinking) return;
@@ -189,7 +193,7 @@ export function Game() {
                     square === 'X' ? 'text-blue-400' : 'text-red-400'
                   }`}
                   onClick={() => handleClick(i)}
-                  disabled={Boolean(square || gameOver || isThinking || !xIsNext)}
+                  disabled={square || gameOver || isThinking || !xIsNext}
                 >
                   {square}
                 </motion.button>

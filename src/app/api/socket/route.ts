@@ -3,6 +3,7 @@ import type { Server as HTTPServer } from 'http';
 import type { Socket as NetSocket } from 'net';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Server as IOServer } from 'socket.io';
+import { NextResponse } from 'next/server';
 
 interface SocketServer extends HTTPServer {
   io?: IOServer | undefined;
@@ -21,17 +22,23 @@ const rooms = new Map();
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function GET(req: Request, { params }: { params: {} }) {
+export async function GET() {
   try {
-    const res = await fetch('http://localhost:3000/api/socket/io');
+    const response = await fetch('http://localhost:3000/api/socket/io');
     
-    if (res.ok) {
-      return new Response('Socket is running', { status: 200 });
+    if (response.ok) {
+      return NextResponse.json({ success: true, message: 'Socket is running' });
     } else {
-      return new Response('Socket initialization failed', { status: 500 });
+      return NextResponse.json(
+        { success: false, message: 'Socket initialization failed' },
+        { status: 500 }
+      );
     }
   } catch (error) {
-    return new Response('Internal Server Error', { status: 500 });
+    return NextResponse.json(
+      { success: false, message: 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }
 

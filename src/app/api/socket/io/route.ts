@@ -1,4 +1,6 @@
 import { Server } from 'socket.io';
+import { NextResponse } from 'next/server';
+import type { NextApiResponse } from 'next';
 import { NextApiResponseWithSocket } from '@/types/socket';
 
 export const dynamic = 'force-dynamic';
@@ -6,14 +8,16 @@ export const runtime = 'nodejs';
 
 const rooms = new Map();
 
-export async function GET(req: Request, res: NextApiResponseWithSocket) {
-  if (res.socket.server.io) {
+export async function GET(req: Request, res: NextApiResponse) {
+  const response = res as NextApiResponseWithSocket;
+
+  if (response.socket.server.io) {
     console.log('Socket.IO already running');
-    return new Response('Socket.IO already running', { status: 200 });
+    return NextResponse.json({ success: true, message: 'Socket.IO already running' });
   }
 
   console.log('Setting up Socket.IO');
-  const io = new Server(res.socket.server, {
+  const io = new Server(response.socket.server as any, {
     path: '/api/socket/io',
     addTrailingSlash: false,
     cors: {
@@ -84,6 +88,6 @@ export async function GET(req: Request, res: NextApiResponseWithSocket) {
     });
   });
 
-  res.socket.server.io = io;
-  return new Response('Socket.IO is running', { status: 200 });
+  response.socket.server.io = io;
+  return NextResponse.json({ success: true, message: 'Socket.IO is running' });
 }

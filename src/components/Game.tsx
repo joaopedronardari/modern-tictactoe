@@ -26,10 +26,11 @@ export function Game() {
   const [history, setHistory] = useState<{ result: string; timestamp: string }[]>([]);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
 
-  const formatTimestamp = () => {
+  const formatTimestamp = useCallback(() => {
+    if (typeof window === 'undefined') return '';  // Return empty string during SSR
     const now = new Date();
     return `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getFullYear()).slice(2)} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-  };
+  }, []);
 
   const updateStats = useCallback((result: string) => {
     let newStats = { ...stats };

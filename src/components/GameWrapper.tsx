@@ -7,15 +7,23 @@ import { AchievementNotification } from "./AchievementNotification";
 import { useGame } from "@/contexts/GameContext";
 
 export function GameWrapper() {
-  const { lastAchievement } = useGame();
-
   return (
     <GameProvider>
+      <GameContent />
+    </GameProvider>
+  );
+}
+
+function GameContent() {
+  const { lastAchievement } = useGame();
+  
+  return (
+    <>
       <Header />
       <AchievementNotification achievement={lastAchievement} />
       <div className="mt-32 w-full max-w-5xl">
         <Game />
       </div>
-    </GameProvider>
+    </>
   );
 }
